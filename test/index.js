@@ -18,30 +18,37 @@ describe("public-key-macaroons", function () {
       .getMacaroon()
       .serialize();
 
-    it("bind encrypted third party caveat", function () {
-      var caveatKey = "my caveat secret";
-      var message = "account = 11238";
-      var actualMessage = "caveat_key = " + caveatKey + "\n" + "message = " + message + "\n";
+    describe("bound macaroon", function () {
+      it("bind encrypted third party caveat", function () {
 
-      var macAndDischarge = publicKeyMacaroons.addPublicKey3rdPartyCaveat(serializedMac, "thing2.com", caveatKey, message, fooPublicKeyPem);
+        console.log(ursa.generatePrivateKey().toPrivatePem("utf8"));
+        debugger;
 
-      var inspectedMac = deserializeFn(macAndDischarge.macaroon).inspect();
-      var lineWithEncoding = _.find(inspectedMac.split("\n"), function (line) {return line.indexOf("cid enc = ") !== -1; });
-      var encoding = lineWithEncoding.split("cid enc = ")[1];
+        var caveatKey = "my caveat secret";
+        var message = "account = 11238";
+        var actualMessage = "caveat_key = " + caveatKey + "\n" + "message = " + message + "\n";
 
-      expect(ursa.createPrivateKey(fooPrivateKeyPem).decrypt(encoding, 'base64', 'utf8')).to.equal(actualMessage);
+        var macAndDischarge = publicKeyMacaroons.addPublicKey3rdPartyCaveat(serializedMac, "thing2.com", caveatKey, message, fooPublicKeyPem);
+
+        var inspectedMac = deserializeFn(macAndDischarge.macaroon).inspect();
+        var lineWithEncoding = _.find(inspectedMac.split("\n"), function (line) {return line.indexOf("cid enc = ") !== -1; });
+        var encoding = lineWithEncoding.split("cid enc = ")[1];
+
+        expect(ursa.createPrivateKey(fooPrivateKeyPem).decrypt(encoding, 'base64', 'utf8')).to.equal(actualMessage);
+      });
     });
 
-    it("discharge valid", function () {
-      var caveatKey = "my caveat secret";
-      var message = "account = 11238";
-      var actualMessage = "caveat_key = " + caveatKey + "\n" + "message = " + message + "\n";
-      var macAndDischarge = publicKeyMacaroons.addPublicKey3rdPartyCaveat(serializedMac, "thing2.com", caveatKey, message, fooPublicKeyPem);
+    describe("discharge", function () {
+      it("discharge valid", function () {
+        var caveatKey = "my caveat secret";
+        var message = "account = 11238";
+        var actualMessage = "caveat_key = " + caveatKey + "\n" + "message = " + message + "\n";
+        var macAndDischarge = publicKeyMacaroons.addPublicKey3rdPartyCaveat(serializedMac, "thing2.com", caveatKey, message, fooPublicKeyPem);
 
-      var encryptedDischarge = macAndDischarge.discharge;
-      console.log("encryptedDischarge = %j", encryptedDischarge);
+        var encryptedDischarge = macAndDischarge.discharge;
 
-      expect(ursa.createPrivateKey(fooPrivateKeyPem).decrypt(encryptedDischarge, 'base64', 'utf8')).to.equal(actualMessage);
+        expect(ursa.createPrivateKey(fooPrivateKeyPem).decrypt(encryptedDischarge, 'base64', 'utf8')).to.equal(actualMessage);
+      });
     });
   });
 });
