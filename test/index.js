@@ -3,8 +3,9 @@
 var expect = require('chai').expect, 
   macaroons = require('macaroons.js'),
   _ = require("lodash"),
+  Buffer = require("buffer"),
   fs = require('fs'),
-  ursa = require('ursa'),
+  NodeRSA = require('node-rsa'),
   MacaroonsBuilder = macaroons.MacaroonsBuilder,
   deserializeFn = MacaroonsBuilder.deserialize,
   publicKeyMacaroons = require('../lib');
@@ -21,9 +22,6 @@ describe("public-key-macaroons", function () {
     describe("bound macaroon", function () {
       it("bind encrypted third party caveat", function () {
 
-        console.log(ursa.generatePrivateKey().toPrivatePem("utf8"));
-        debugger;
-
         var caveatKey = "my caveat secret";
         var message = "account = 11238";
         var actualMessage = "caveat_key = " + caveatKey + "\n" + "message = " + message + "\n";
@@ -34,7 +32,10 @@ describe("public-key-macaroons", function () {
         var lineWithEncoding = _.find(inspectedMac.split("\n"), function (line) {return line.indexOf("cid enc = ") !== -1; });
         var encoding = lineWithEncoding.split("cid enc = ")[1];
 
-        expect(ursa.createPrivateKey(fooPrivateKeyPem).decrypt(encoding, 'base64', 'utf8')).to.equal(actualMessage);
+        var key = new NodeRSA();
+        key.importKey(fooPrivateKeyPem);
+
+        expect(key.decrypt(encoding).toString('utf8')).to.equal(actualMessage);
       });
     });
 
@@ -47,7 +48,10 @@ describe("public-key-macaroons", function () {
 
         var encryptedDischarge = macAndDischarge.discharge;
 
-        expect(ursa.createPrivateKey(fooPrivateKeyPem).decrypt(encryptedDischarge, 'base64', 'utf8')).to.equal(actualMessage);
+        var key = new NodeRSA();
+        key.importKey(fooPrivateKeyPem);
+
+        expect(key.decrypt(encryptedDischarge).toString('utf8')).to.equal(actualMessage);
       });
     });
   });
