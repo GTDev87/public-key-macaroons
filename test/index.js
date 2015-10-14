@@ -24,7 +24,7 @@ describe("public-key-macaroons", function () {
 
         var caveatKey = "my caveat secret";
         var message = "account = 11238";
-        var actualMessage = "caveat_key = " + caveatKey + "\n" + "message = " + message + "\n";
+        var actualMessage = "caveat_key = " + caveatKey + "\n" + "message = (" + message + ")\n";
 
         var macAndDischarge = publicKeyMacaroons.addPublicKey3rdPartyCaveat(serializedMac, "thing2.com", caveatKey, message, fooPublicKeyPem);
 
@@ -43,7 +43,7 @@ describe("public-key-macaroons", function () {
       it("discharge valid", function () {
         var caveatKey = "my caveat secret";
         var message = "account = 11238";
-        var actualMessage = "caveat_key = " + caveatKey + "\n" + "message = " + message + "\n";
+        var actualMessage = "caveat_key = " + caveatKey + "\n" + "message = (" + message + ")\n";
         var macAndDischarge = publicKeyMacaroons.addPublicKey3rdPartyCaveat(serializedMac, "thing2.com", caveatKey, message, fooPublicKeyPem);
 
         var encryptedDischarge = macAndDischarge.discharge;
