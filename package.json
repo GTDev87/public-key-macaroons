@@ -1,6 +1,6 @@
 {
   "name": "public-key-macaroons",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Adds public key 3rd party caveats to macaroons",
   "homepage": "https://github.com/GTDev87/public-key-macaroons",
   "repository": "GTDev87/public-key-macaroons",
