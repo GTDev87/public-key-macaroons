@@ -15,9 +15,7 @@ describe("public-key-macaroons", function () {
 
     var fooPublicKeyPem = fs.readFileSync(__dirname + "/pem/foo.pub.pem", "utf8");
     var fooPrivateKeyPem = fs.readFileSync(__dirname + "/pem/foo.priv.pem", "utf8");
-    var serializedMac = new MacaroonsBuilder("thing1.com", "my secret", "identifier")
-      .getMacaroon()
-      .serialize();
+    var deserializedMac = new MacaroonsBuilder("thing1.com", "my secret", "identifier").getMacaroon();
 
     describe("bound macaroon", function () {
       it("bind encrypted third party caveat", function () {
@@ -26,7 +24,7 @@ describe("public-key-macaroons", function () {
         var message = "account = 11238";
         var actualMessage = "caveat_key = " + caveatKey + "\n" + "message = " + message + "\n";
 
-        var macAndDischarge = publicKeyMacaroons.addPublicKey3rdPartyCaveat(serializedMac, "thing2.com", caveatKey, message, fooPublicKeyPem);
+        var macAndDischarge = publicKeyMacaroons.addPublicKey3rdPartyCaveat(deserializedMac, "thing2.com", caveatKey, message, fooPublicKeyPem);
 
         var inspectedMac = deserializeFn(macAndDischarge.macaroon).inspect();
         var lineWithEncoding = _.find(inspectedMac.split("\n"), function (line) {return line.indexOf("cid enc = ") !== -1; });
@@ -44,7 +42,7 @@ describe("public-key-macaroons", function () {
         var caveatKey = "my caveat secret";
         var message = "account = 11238";
         var actualMessage = "caveat_key = " + caveatKey + "\n" + "message = " + message + "\n";
-        var macAndDischarge = publicKeyMacaroons.addPublicKey3rdPartyCaveat(serializedMac, "thing2.com", caveatKey, message, fooPublicKeyPem);
+        var macAndDischarge = publicKeyMacaroons.addPublicKey3rdPartyCaveat(deserializedMac, "thing2.com", caveatKey, message, fooPublicKeyPem);
 
         var encryptedDischarge = macAndDischarge.discharge;
 
