@@ -1,13 +1,13 @@
 'use strict';
 
 var expect = require('chai').expect, 
-  macaroons = require('macaroons.js'),
+  macaroons = require('node-macaroons'),
   _ = require("lodash"),
   Buffer = require("buffer"),
   fs = require('fs'),
   NodeRSA = require('node-rsa'),
-  MacaroonsBuilder = macaroons.MacaroonsBuilder,
-  deserializeFn = MacaroonsBuilder.deserialize,
+  // MacaroonsBuilder = macaroons.MacaroonsBuilder,
+  // deserializeFn = MacaroonsBuilder.deserialize,
   publicKeyMacaroons = require('../lib');
 
 describe("public-key-macaroons", function () {
@@ -15,7 +15,8 @@ describe("public-key-macaroons", function () {
 
     var fooPublicKeyPem = fs.readFileSync(__dirname + "/pem/foo.pub.pem", "utf8");
     var fooPrivateKeyPem = fs.readFileSync(__dirname + "/pem/foo.priv.pem", "utf8");
-    var deserializedMac = new MacaroonsBuilder("thing1.com", "my secret", "identifier").getMacaroon();
+
+    var deserializedMac = macaroons.newMacaroon("my secret", "identifier", "thing1.com");
 
     describe("bound macaroon", function () {
       it("bind encrypted third party caveat", function () {
@@ -26,9 +27,9 @@ describe("public-key-macaroons", function () {
 
         var macAndDischarge = publicKeyMacaroons.addPublicKey3rdPartyCaveat(deserializedMac, "thing2.com", caveatKey, message, fooPublicKeyPem);
 
-        var inspectedMac = deserializeFn(macAndDischarge.macaroon).inspect();
-        var lineWithEncoding = _.find(inspectedMac.split("\n"), function (line) {return line.indexOf("cid enc = ") !== -1; });
-        var encoding = lineWithEncoding.split("cid enc = ")[1];
+        var inspectedMac = macaroons.deserialize(macAndDischarge.macaroon);
+        var cavWithEncoding = _.find(inspectedMac.getCaveats(), function (cav) { return cav._identifier.indexOf("enc = ") !== -1; });
+        var encoding = cavWithEncoding._identifier.split("enc = ")[1];
 
         var key = new NodeRSA();
         key.importKey(fooPrivateKeyPem);
