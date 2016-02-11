@@ -27,30 +27,13 @@ describe("public-key-macaroons", function () {
 
         var macAndDischarge = publicKeyMacaroons.addPublicKey3rdPartyCaveat(deserializedMac, "thing2.com", caveatKey, message, fooPublicKeyPem);
 
-        var inspectedMac = macaroons.deserialize(macAndDischarge.macaroon);
-        var cavWithEncoding = _.find(inspectedMac.getCaveats(), function (cav) { return cav._identifier.indexOf("enc = ") !== -1; });
+        var cavWithEncoding = _.find(macAndDischarge.getCaveats(), function (cav) { return cav._identifier.indexOf("enc = ") !== -1; });
         var encoding = cavWithEncoding._identifier.split("enc = ")[1];
 
         var key = new NodeRSA();
         key.importKey(fooPrivateKeyPem);
 
         expect(key.decrypt(encoding).toString('utf8')).to.equal(actualMessage);
-      });
-    });
-
-    describe("discharge", function () {
-      it("discharge valid", function () {
-        var caveatKey = "my caveat secret";
-        var message = "account = 11238";
-        var actualMessage = "caveat_key = " + caveatKey + "\n" + "message = " + message + "\n";
-        var macAndDischarge = publicKeyMacaroons.addPublicKey3rdPartyCaveat(deserializedMac, "thing2.com", caveatKey, message, fooPublicKeyPem);
-
-        var encryptedDischarge = macAndDischarge.discharge;
-
-        var key = new NodeRSA();
-        key.importKey(fooPrivateKeyPem);
-
-        expect(key.decrypt(encryptedDischarge).toString('utf8')).to.equal(actualMessage);
       });
     });
   });
